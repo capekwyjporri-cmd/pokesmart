@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéSmart - Gerador de Times Competitivos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+
+        header h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+
+        .panel h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+        }
+
+        button {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-generate:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-clear {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-clear:hover {
+            background: #e0e0e0;
+        }
+
+        .team-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .pokemon-card {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border: 2px solid #667eea;
+            transition: all 0.3s;
+        }
+
+        .pokemon-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(102, 126, 234, 0.2);
+        }
+
+        .pokemon-name {
+            font-weight: 700;
+            font-size: 1.1em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .pokemon-type {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+
+        .pokemon-stats {
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .type-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-right: 5px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .type-normal { background: #A8A878; }
+        .type-fire { background: #F08030; }
+        .type-water { background: #6890F0; }
+        .type-grass { background: #78C850; }
+        .type-electric { background: #F8D030; color: #333; }
+        .type-ice { background: #98D8D8; color: #333; }
+        .type-fighting { background: #C03028; }
+        .type-poison { background: #A040A0; }
+        .type-ground { background: #E0C068; color: #333; }
+        .type-flying { background: #A890F0; }
+        .type-psychic { background: #F85888; }
+        .type-bug { background: #A8B820; }
+        .type-rock { background: #B8A038; }
+        .type-ghost { background: #705898; }
+        .type-dragon { background: #7038F8; }
+        .type-dark { background: #705848; }
+        .type-steel { background: #B8B8D0; color: #333; }
+        .type-fairy { background: #EE99AC; color: #333; }
+
+        .error {
+            background: #fee;
+            border: 2px solid #f00;
+            color: #c00;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .success {
+            background: #efe;
+            border: 2px solid #0f0;
+            color: #060;
+            padding: 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+        }
+
+        .no-team {
+            text-align: center;
+            color: #999;
+            padding: 40px 20px;
+            font-size: 1.1em;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 2em;
+            }
+
+            .team-container {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            background: #f0f7ff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 0.95em;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ PokéSmart</h1>
+            <p>Gerador Inteligente de Times Pokémon Competitivos</p>
+        </header>
+
+        <div class="content">
+            <div class="panel">
+                <h2>⚙️ Configurações</h2>
+                
+                <div class="form-group">
+                    <label for="gameVersion">Geração/Versão:</label>
+                    <select id="gameVersion">
+                        <option value="all">Todas as Gerações</option>
+                        <option value="gen1">Geração 1 (Red/Blue)</option>
+                        <option value="gen2">Geração 2 (Gold/Silver)</option>
+                        <option value="gen3">Geração 3 (Ruby/Sapphire)</option>
+                        <option value="gen4">Geração 4 (Diamond/Pearl)</option>
+                        <option value="gen5">Geração 5 (Black/White)</option>
+                        <option value="gen6">Geração 6 (X/Y)</option>
+                        <option value="gen7">Geração 7 (Sun/Moon)</option>
+                        <option value="gen8">Geração 8 (Sword/Shield)</option>
+                        <option value="gen9">Geração 9 (Scarlet/Violet)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="difficulty">Nível de Dificuldade:</label>
+                    <select id="difficulty">
+                        <option value="casual">Casual (Pokémon variados)</option>
+                        <option value="competitive" selected>Competitivo (Altos stats)</option>
+                        <option value="legendary">Lendário (Pokémon lendários)</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="typePreference">Preferência de Tipo:</label>
+                    <select id="typePreference">
+                        <option value="random">Aleatório</option>
+                        <option value="fire">Fogo</option>
+                        <option value="water">Água</option>
+                        <option value="grass">Grama</option>
+                        <option value="electric">Elétrico</option>
+                        <option value="psychic">Psíquico</option>
+                        <option value="dragon">Dragão</option>
+                        <option value="dark">Sombrio</option>
+                        <option value="steel">Aço</option>
+                    </select>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn-generate" onclick="generateTeam()">🎲 Gerar Time</button>
+                    <button class="btn-clear" onclick="clearTeam()">🗑️ Limpar</button>
+                </div>
+
+                <div class="info-box">
+                    <strong>💡 Dica:</strong> Clique em "Gerar Time" para criar um novo time de 6 Pokémon com tipos balanceados e competitivos!
+                </div>
+            </div>
+
+            <div class="panel">
+                <h2>👥 Seu Time</h2>
+                <div id="teamDisplay" class="team-container">
+                    <div class="no-team">Clique em "Gerar Time" para começar</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Base de dados de Pokémon (simplificada)
+        const pokemonDatabase = {
+            gen1: {
+                fire: ['Charizard', 'Arcanine', 'Ninetales'],
+                water: ['Blastoise', 'Lapras', 'Gyarados'],
+                grass: ['Venusaur', 'Vileplume', 'Exeggutor'],
+                electric: ['Pikachu', 'Raichu', 'Magneton'],
+                psychic: ['Alakazam', 'Slowbro', 'Jynx'],
+                dragon: ['Dragonite'],
+                dark: [],
+                steel: []
+            },
+            gen2: {
+                fire: ['Typhlosion', 'Houndoom', 'Arcanine'],
+                water: ['Feraligatr', 'Lapras', 'Gyarados'],
+                grass: ['Meganium', 'Vileplume'],
+                electric: ['Ampharos', 'Pikachu'],
+                psychic: ['Alakazam', 'Espeon'],
+                dragon: ['Dragonite', 'Kingdra'],
+                dark: ['Houndoom', 'Umbreon'],
+                steel: ['Scizor']
+            },
+            gen3: {
+                fire: ['Blaziken', 'Arcanine', 'Camerupt'],
+                water: ['Swampert', 'Milotic', 'Kyogre'],
+                grass: ['Sceptile', 'Cacturne'],
+                electric: ['Manectric', 'Ampharos'],
+                psychic: ['Alakazam', 'Gardevoir'],
+                dragon: ['Salamence', 'Dragonite'],
+                dark: ['Absol', 'Shiftry'],
+                steel: ['Metagross', 'Scizor']
+            },
+            gen4: {
+                fire: ['Infernape', 'Rapidash', 'Arcanine'],
+                water: ['Empoleon', 'Floatzel', 'Gyarados'],
+                grass: ['Torterra', 'Roserade'],
+                electric: ['Electivire', 'Luxray'],
+                psychic: ['Alakazam', 'Gardevoir'],
+                dragon: ['Garchomp', 'Dragonite'],
+                dark: ['Spiritomb', 'Umbreon'],
+                steel: ['Metagross', 'Magnezone']
+            },
+            gen5: {
+                fire: ['Emboar', 'Chandelure', 'Arcanine'],
+                water: ['Samurott', 'Starmie', 'Gyarados'],
+                grass: ['Serperior', 'Ferrothorn'],
+                electric: ['Zekrom', 'Ampharos'],
+                psychic: ['Alakazam', 'Gardevoir'],
+                dragon: ['Salamence', 'Druddigon'],
+                dark: ['Bisharp', 'Hydreigon'],
+                steel: ['Ferrothorn', 'Excadrill']
+            },
+            gen6: {
+                fire: ['Blaziken', 'Talonflame', 'Arcanine'],
+                water: ['Greninja', 'Mega Gyarados', 'Lapras'],
+                grass: ['Mega Venusaur', 'Ferrothorn'],
+                electric: ['Ampharos', 'Manectric'],
+                psychic: ['Alakazam', 'Gardevoir'],
+                dragon: ['Salamence', 'Garchomp'],
+                dark: ['Bisharp', 'Hydreigon'],
+                steel: ['Mega Metagross', 'Ferrothorn']
+            },
+            gen7: {
+                fire: ['Incineroar', 'Arcanine', 'Talonflame'],
+                water: ['Primarina', 'Gyarados', 'Lapras'],
+                grass: ['Decidueye', 'Ferrothorn'],
+                electric: ['Ampharos', 'Togedemaru'],
+                psychic: ['Alakazam', 'Alolan Raichu'],
+                dragon: ['Salamence', 'Garchomp'],
+                dark: ['Bisharp', 'Hydreigon'],
+                steel: ['Metagross', 'Ferrothorn']
+            },
+            gen8: {
+                fire: ['Cinderace', 'Arcanine', 'Heatran'],
+                water: ['Inteleon', 'Gyarados', 'Lapras'],
+                grass: ['Rillaboom', 'Ferrothorn'],
+                electric: ['Toxtricity', 'Ampharos'],
+                psychic: ['Alakazam', 'Indeedee'],
+                dragon: ['Salamence', 'Garchomp'],
+                dark: ['Bisharp', 'Hydreigon'],
+                steel: ['Excadrill', 'Corviknight']
+            },
+            gen9: {
+                fire: ['Skeledirge', 'Arcanine', 'Heatran'],
+                water: ['Quaquaval', 'Gyarados', 'Lapras'],
+                grass: ['Meowscarada', 'Ferrothorn'],
+                electric: ['Ampharos', 'Luxray'],
+                psychic: ['Alakazam', 'Gardevoir'],
+                dragon: ['Salamence', 'Garchomp'],
+                dark: ['Bisharp', 'Hydreigon'],
+                steel: ['Excadrill', 'Corviknight']
+            }
+        };
+
+        const allTypes = ['fire', 'water', 'grass', 'electric', 'psychic', 'dragon', 'dark', 'steel'];
+        const typeEmojis = {
+            fire: '🔥', water: '💧', grass: '🌿', electric: '⚡',
+            psychic: '🧠', dragon: '🐉', dark: '🌑', steel: '⚙️'
+        };
+
+        function getRandomElement(array) {
+            return array[Math.floor(Math.random() * array.length)];
+        }
+
+        function generateTeam() {
+            const version = document.getElementById('gameVersion').value;
+            const difficulty = document.getElementById('difficulty').value;
+            const typePreference = document.getElementById('typePreference').value;
+
+            const baseDB = version === 'all' ? getAllPokemon() : pokemonDatabase[version];
+            let team = [];
+
+            // Adicionar preferência de tipo se não aleatório
+            if (typePreference !== 'random' && baseDB[typePreference]) {
+                const pokemon = getRandomElement(baseDB[typePreference]);
+                team.push({ name: pokemon, type: typePreference });
+            }
+
+            // Completar com Pokémon de tipos variados
+            const usedTypes = team.length > 0 ? [team[0].type] : [];
+            while (team.length < 6) {
+                let type = getRandomElement(allTypes);
+                if (!usedTypes.includes(type) && baseDB[type] && baseDB[type].length > 0) {
+                    const pokemon = getRandomElement(baseDB[type]);
+                    team.push({ name: pokemon, type: type });
+                    usedTypes.push(type);
+                }
+            }
+
+            displayTeam(team);
+        }
+
+        function getAllPokemon() {
+            const all = { fire: [], water: [], grass: [], electric: [], psychic: [], dragon: [], dark: [], steel: [] };
+            Object.values(pokemonDatabase).forEach(gen => {
+                Object.keys(all).forEach(type => {
+                    all[type] = [...new Set([...all[type], ...gen[type]])];
+                });
+            });
+            return all;
+        }
+
+        function displayTeam(team) {
+            const display = document.getElementById('teamDisplay');
+            display.innerHTML = team.map((poke, i) => `
+                <div class="pokemon-card">
+                    <div style="font-size: 2.5em; margin-bottom: 10px;">${getTypeEmoji(poke.type)}</div>
+                    <div class="pokemon-name">#${i + 1} ${poke.name}</div>
+                    <span class="pokemon-type type-${poke.type}">${capitalizeType(poke.type)}</span>
+                </div>
+            `).join('');
+        }
+
+        function clearTeam() {
+            document.getElementById('teamDisplay').innerHTML = '<div class="no-team">Clique em "Gerar Time" para começar</div>';
+        }
+
+        function getTypeEmoji(type) {
+            return typeEmojis[type] || '✨';
+        }
+
+        function capitalizeType(type) {
+            const types = {
+                fire: 'Fogo', water: 'Água', grass: 'Grama', electric: 'Elétrico',
+                psychic: 'Psíquico', dragon: 'Dragão', dark: 'Sombrio', steel: 'Aço'
+            };
+            return types[type] || type;
+        }
+    </script>
+</body>
+</html>
